@@ -1,7 +1,11 @@
+// MONGODB = mongodb+srv://neoGStudent:SowhomNeoG@neog.somlulk.mongodb.net/?retryWrites=true&w=majority&appName=neoG
+// PORT = 3000
+
+require("dotenv").config();
 const express = require("express");
 const app = express();
 const cors = require("cors");
-require("dotenv").config();
+
 app.use(express.json());
 
 const { initializeDatabase } = require("./db/db.connect");
@@ -9,28 +13,28 @@ const Product = require("./models/product.model");
 const Address = require("./models/address.model");
 const Category = require("./models/category.model");
 
-const fs = require("fs");
+// const fs = require("fs");
 
 initializeDatabase();
 
-const jsonData = fs.readFileSync("categories.json", "utf-8");
-const categoriesData = JSON.parse(jsonData);
+// const jsonData = fs.readFileSync("categories.json", "utf-8");
+// const categoriesData = JSON.parse(jsonData);
 
-async function seedCategoryData() {
-  try {
-    for (catagoryData of categoriesData) {
-      const newCategory = new Category({
-        name: catagoryData.name,
-        img: catagoryData.img
-      });
-      await newCategory.save();
+// async function seedCategoryData() {
+//   try {
+//     for (catagoryData of categoriesData) {
+//       const newCategory = new Category({
+//         name: catagoryData.name,
+//         img: catagoryData.img
+//       });
+//       await newCategory.save();
 
-    }
-  } catch (error) {
-    console.log("Error while seeding the data");
+//     }
+//   } catch (error) {
+//     console.log("Error while seeding the data");
 
-  }
-}
+//   }
+// }
 // seedCategoryData();
 
 const corsOptions = {
