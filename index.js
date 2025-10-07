@@ -12,6 +12,7 @@ const { initializeDatabase } = require("./db/db.connect");
 const Product = require("./models/product.model");
 const Address = require("./models/address.model");
 const Category = require("./models/category.model");
+const Order = require("./models/order.model");
 
 // const fs = require("fs");
 
@@ -309,6 +310,79 @@ app.delete("/addresses/:addressId", async (req, res) => {
     }
   } catch (error) {
     res.status(500).json({ error: "Failed to delete Address" });
+  }
+});
+
+// POST /orders
+app.post("/orders", async (req, res) => {
+  try {
+    const { items, address, totalAmount } = req.body;
+
+    // Validate input
+    if (!items || !Array.isArray(items) || items.length === 0) {
+      return res.status(400).json({ error: "Cart is empty or invalid." });
+    }
+
+    if (!address || !totalAmount) {
+      return res.status(400).json({ error: "Shipping address and total amount are required." });
+    }
+
+    // 1. ✅ Save the order
+    const newOrder = new Order({
+      items: items.map(item => ({
+        productId: item._id,
+        name: item.name,
+        price: item.price,
+        quantity: item.quantity,
+        img: item.img
+      })),
+      shippingAddress: address,
+      totalAmount: totalAmount
+    });
+
+    await newOrder.save();
+
+    // 2. ✅ CLEAR THE CART — set isCarted: false for all carted products
+    const cartedProductIds = items.map(item => item._id);
+    await Product.updateMany(
+      { _id: { $in: cartedProductIds } },
+      { 
+        $set: { 
+          isCarted: false,
+          quantity: 1 // reset quantity to default
+        } 
+      }
+    );
+
+
+    res.status(201).json({
+      message: "Order placed successfully!",
+      orderId: newOrder._id
+    });
+
+  } catch (error) {
+    console.error("Order creation error:", error);
+    res.status(500).json({ error: "Failed to place order. Please try again." });
+  }
+});
+
+// GET /orders — fetch all orders (admin view for now)
+app.get("/orders", async (req, res) => {
+  try {
+    // Sort by newest first
+    const orders = await Order.find().sort({ createdAt: -1 });
+
+    if (orders.length === 0) {
+      return res.status(404).json({ message: "No orders found." });
+    }
+
+    res.status(200).json({
+      message: "Orders fetched successfully.",
+      orders
+    });
+  } catch (error) {
+    console.error("Error fetching orders:", error);
+    res.status(500).json({ error: "Failed to fetch orders." });
   }
 });
 
