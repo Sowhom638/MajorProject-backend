@@ -292,26 +292,6 @@ app.get("/addresses", async (req, res) => {
   }
 });
 
-async function deleteAddress(addressId) {
-  try {
-    const deletedAddress = await Address.findByIdAndDelete(addressId);
-    return deletedAddress;
-  } catch (error) {
-    console.log(error);
-  }
-}
-app.delete("/addresses/:addressId", async (req, res) => {
-  try {
-    const deletedAddress = await deleteAddress(req.params.addressId);
-    if (deletedAddress) {
-      res.status(200).json({ message: "Address deleted successfully.", deletedAddress });
-    } else {
-      res.status(404).json({ error: "Address not found." });
-    }
-  } catch (error) {
-    res.status(500).json({ error: "Failed to delete Address" });
-  }
-});
 
 // POST /orders
 app.post("/orders", async (req, res) => {
